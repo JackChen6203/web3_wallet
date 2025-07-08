@@ -22,7 +22,7 @@ class TurboWalletGenerator {
     this.rangeSize = 1000000;
     this.currentRange = null;
     this.currentIndex = 0;
-    this.batchSize = 100; // 優化批次大小
+    this.batchSize = 200; // 增加批次大小以減少隊列積壓
     
     // Supabase
     this.supabase = null;
@@ -111,8 +111,8 @@ class TurboWalletGenerator {
       addresses.push(wallet.address);
     }
     
-    // 並行餘額檢查
-    const balanceResults = await this.balanceChecker.fastScanMode(addresses, 'bitcoin');
+    // 並行餘額檢查 - 使用批量優化模式
+    const balanceResults = await this.balanceChecker.batchCheckBalances(addresses, 'bitcoin', 50);
     
     // 合併結果
     const walletsWithBalance = [];

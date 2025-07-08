@@ -59,10 +59,17 @@ class AdvancedBalanceChecker {
     // 智能隊列配置
     this.queue = [];
     this.processing = false;
-    this.maxConcurrent = 20; // 最大並發數
+    this.maxConcurrent = 50; // 增加並發數
     this.activeRequests = 0;
     this.retryAttempts = 3;
-    this.baseDelay = 100; // 基礎延遲 ms
+    this.baseDelay = 50; // 減少基礎延遲
+    
+    // 動態調整配置
+    this.dynamicScaling = true;
+    this.lastQueueSize = 0;
+    this.queueGrowthRate = 0;
+    this.performanceHistory = [];
+    this.lastAdjustTime = Date.now();
 
     // API 狀態追踪
     this.apiStats = new Map();
@@ -74,6 +81,9 @@ class AdvancedBalanceChecker {
 
     // 開始處理隊列
     this.startQueueProcessor();
+    
+    // 啟動隊列監控
+    this.startQueueMonitoring();
   }
 
   // 初始化 API 統計
@@ -167,6 +177,11 @@ class AdvancedBalanceChecker {
     this.processing = true;
     
     while (this.processing) {
+      // 動態調整並發數
+      if (this.dynamicScaling) {
+        this.adjustConcurrency();
+      }
+      
       if (this.queue.length > 0 && this.activeRequests < this.maxConcurrent) {
         const request = this.queue.shift();
         this.activeRequests++;
@@ -178,8 +193,47 @@ class AdvancedBalanceChecker {
           });
       }
       
-      // 短暫延遲避免 CPU 過載
-      await new Promise(resolve => setTimeout(resolve, 10));
+      // 批量處理模式：當隊列過大時，減少延遲
+      const delay = this.queue.length > 100 ? 1 : (this.queue.length > 50 ? 5 : 10);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+
+  // 動態調整並發數
+  adjustConcurrency() {
+    const now = Date.now();
+    const queueSize = this.queue.length;
+    
+    // 每 5 秒調整一次
+    if (now - this.lastAdjustTime < 5000) return;
+    
+    this.queueGrowthRate = queueSize - this.lastQueueSize;
+    this.lastQueueSize = queueSize;
+    this.lastAdjustTime = now;
+    
+    // 隊列積壓嚴重時增加並發
+    if (queueSize > 200 && this.queueGrowthRate > 0) {
+      this.maxConcurrent = Math.min(100, this.maxConcurrent + 10);
+      console.log(`📈 隊列積壓，增加並發至 ${this.maxConcurrent}`);
+    }
+    // 隊列穩定時適當減少並發
+    else if (queueSize < 20 && this.queueGrowthRate <= 0 && this.maxConcurrent > 50) {
+      this.maxConcurrent = Math.max(50, this.maxConcurrent - 5);
+      console.log(`📉 隊列穩定，降低並發至 ${this.maxConcurrent}`);
+    }
+    
+    // 記錄性能歷史
+    this.performanceHistory.push({
+      timestamp: now,
+      queueSize,
+      activeRequests: this.activeRequests,
+      maxConcurrent: this.maxConcurrent,
+      queueGrowthRate: this.queueGrowthRate
+    });
+    
+    // 只保留最近 100 個記錄
+    if (this.performanceHistory.length > 100) {
+      this.performanceHistory.shift();
     }
   }
 
@@ -416,7 +470,13 @@ class AdvancedBalanceChecker {
   // 獲取統計信息
   getStats() {
     const stats = {};
+    let totalRequests = 0;
+    let totalSuccessful = 0;
+    
     for (const [apiName, apiStats] of this.apiStats) {
+      totalRequests += apiStats.totalRequests;
+      totalSuccessful += apiStats.successfulRequests;
+      
       stats[apiName] = {
         ...apiStats,
         successRate: apiStats.totalRequests > 0 ? 
@@ -424,18 +484,75 @@ class AdvancedBalanceChecker {
       };
     }
     
+    const overallSuccessRate = totalRequests > 0 ? 
+      (totalSuccessful / totalRequests * 100).toFixed(1) + '%' : '0%';
+    
     return {
       apis: stats,
+      overall: {
+        totalRequests,
+        successfulRequests: totalSuccessful,
+        successRate: overallSuccessRate
+      },
       queue: {
         pending: this.queue.length,
         processing: this.activeRequests,
-        maxConcurrent: this.maxConcurrent
+        maxConcurrent: this.maxConcurrent,
+        dynamicScaling: this.dynamicScaling
       },
       cache: {
         size: this.cache.size,
         expiryTime: this.cacheExpiry / 1000 + 's'
+      },
+      performance: {
+        queueGrowthRate: this.queueGrowthRate,
+        lastQueueSize: this.lastQueueSize,
+        recentPerformance: this.performanceHistory.slice(-5)
       }
     };
+  }
+
+  // 批量地址檢查優化
+  async batchCheckBalances(addresses, type = 'bitcoin', batchSize = 100) {
+    console.log(`🚀 批量檢查模式: ${addresses.length} 個地址，批次大小: ${batchSize}`);
+    
+    const results = [];
+    const startTime = Date.now();
+    
+    // 分批處理
+    for (let i = 0; i < addresses.length; i += batchSize) {
+      const batch = addresses.slice(i, i + batchSize);
+      const batchPromises = batch.map(address => 
+        this.checkBalance(address, type).catch(error => ({
+          address,
+          error: error.message,
+          hasBalance: false,
+          type
+        }))
+      );
+      
+      const batchResults = await Promise.all(batchPromises);
+      results.push(...batchResults);
+      
+      // 批次間短暫延遲，避免過度負載
+      if (i + batchSize < addresses.length) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+      
+      // 顯示進度
+      const progress = Math.min(i + batchSize, addresses.length);
+      const percentage = (progress / addresses.length * 100).toFixed(1);
+      console.log(`📊 批量檢查進度: ${progress}/${addresses.length} (${percentage}%)`);
+    }
+    
+    const duration = (Date.now() - startTime) / 1000;
+    const speed = addresses.length / duration;
+    const withBalance = results.filter(result => result.hasBalance);
+    
+    console.log(`✅ 批量檢查完成: ${addresses.length} 個地址，${duration.toFixed(2)}s，${speed.toFixed(1)} 地址/秒`);
+    console.log(`💰 發現 ${withBalance.length} 個有餘額的地址`);
+    
+    return { results, withBalance, stats: { duration, speed } };
   }
 
   // 清理緩存
@@ -451,6 +568,32 @@ class AdvancedBalanceChecker {
   // 停止處理
   stop() {
     this.processing = false;
+    
+    // 清理定時器
+    if (this.cleanupTimer) {
+      clearInterval(this.cleanupTimer);
+    }
+    if (this.monitorTimer) {
+      clearInterval(this.monitorTimer);
+    }
+  }
+
+  // 啟動隊列監控
+  startQueueMonitoring() {
+    this.monitorTimer = setInterval(() => {
+      const queueSize = this.queue.length;
+      const activeRequests = this.activeRequests;
+      
+      // 隊列積壓警告
+      if (queueSize > 500) {
+        console.warn(`⚠️ 隊列積壓嚴重: ${queueSize} 個待處理，${activeRequests} 個處理中`);
+      }
+      
+      // 自動清理過期緩存
+      if (this.cache.size > 1000) {
+        this.clearExpiredCache();
+      }
+    }, 10000); // 每10秒檢查一次
   }
 }
 
