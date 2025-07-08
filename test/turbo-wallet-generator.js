@@ -18,11 +18,11 @@ class TurboWalletGenerator {
     // 高級餘額檢查器
     this.balanceChecker = new AdvancedBalanceChecker();
     
-    // 範圍配置
+    // 範圍配置 - 針對雲端環境優化
     this.rangeSize = 1000000;
     this.currentRange = null;
     this.currentIndex = 0;
-    this.batchSize = 200; // 增加批次大小以減少隊列積壓
+    this.batchSize = this.getOptimalBatchSize(); // 根據環境自動調整批次大小
     
     // Supabase
     this.supabase = null;
@@ -41,6 +41,22 @@ class TurboWalletGenerator {
     
     this.ensureDirectories();
     this.setupGracefulShutdown();
+  }
+
+  // 獲取最佳批次大小
+  getOptimalBatchSize() {
+    const cpuCores = require('os').cpus().length;
+    
+    // 根據 CPU 核心數調整批次大小
+    if (cpuCores <= 2) {
+      return 50; // 低配置環境，減少批次大小
+    } else if (cpuCores <= 4) {
+      return 100; // 中配置環境
+    } else if (cpuCores <= 8) {
+      return 150; // 高配置環境
+    } else {
+      return 200; // 超高配置環境
+    }
   }
 
   // 生成機器ID
@@ -111,8 +127,9 @@ class TurboWalletGenerator {
       addresses.push(wallet.address);
     }
     
-    // 並行餘額檢查 - 使用批量優化模式
-    const balanceResults = await this.balanceChecker.batchCheckBalances(addresses, 'bitcoin', 50);
+    // 並行餘額檢查 - 使用批量優化模式，根據環境調整子批次大小
+    const subBatchSize = require('os').cpus().length <= 2 ? 20 : 50;
+    const balanceResults = await this.balanceChecker.batchCheckBalances(addresses, 'bitcoin', subBatchSize);
     
     // 合併結果
     const walletsWithBalance = [];
@@ -213,6 +230,8 @@ class TurboWalletGenerator {
   async startTurboGeneration(options = {}) {
     console.log(`🚀 啟動 TURBO 錢包生成器`);
     console.log(`🆔 機器ID: ${this.machineId}`);
+    console.log(`💻 系統配置: ${require('os').cpus().length} CPU 核心`);
+    console.log(`📦 批次大小: ${this.batchSize} 錢包/批次`);
     console.log(`⚡ 特色: 高速生成 + 智能餘額檢查 + 多API負載平衡`);
     
     await this.initializeSupabase();

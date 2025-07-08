@@ -56,13 +56,13 @@ class AdvancedBalanceChecker {
       }
     ];
 
-    // 智能隊列配置
+    // 智能隊列配置 - 針對雲端環境優化
     this.queue = [];
     this.processing = false;
-    this.maxConcurrent = 50; // 增加並發數
+    this.maxConcurrent = this.detectOptimalConcurrency(); // 自動檢測最佳並發數
     this.activeRequests = 0;
-    this.retryAttempts = 3;
-    this.baseDelay = 50; // 減少基礎延遲
+    this.retryAttempts = 2; // 減少重試次數
+    this.baseDelay = 100; // 增加延遲以減少負載
     
     // 動態調整配置
     this.dynamicScaling = true;
@@ -70,6 +70,7 @@ class AdvancedBalanceChecker {
     this.queueGrowthRate = 0;
     this.performanceHistory = [];
     this.lastAdjustTime = Date.now();
+    this.cpuCores = require('os').cpus().length;
 
     // API 狀態追踪
     this.apiStats = new Map();
@@ -84,6 +85,22 @@ class AdvancedBalanceChecker {
     
     // 啟動隊列監控
     this.startQueueMonitoring();
+  }
+
+  // 檢測最佳並發數
+  detectOptimalConcurrency() {
+    const cpuCores = require('os').cpus().length;
+    
+    // 根據 CPU 核心數動態調整
+    if (cpuCores <= 2) {
+      return 8; // 低配置環境
+    } else if (cpuCores <= 4) {
+      return 16; // 中配置環境
+    } else if (cpuCores <= 8) {
+      return 32; // 高配置環境
+    } else {
+      return 50; // 超高配置環境
+    }
   }
 
   // 初始化 API 統計
@@ -204,22 +221,28 @@ class AdvancedBalanceChecker {
     const now = Date.now();
     const queueSize = this.queue.length;
     
-    // 每 5 秒調整一次
-    if (now - this.lastAdjustTime < 5000) return;
+    // 每 10 秒調整一次（減少調整頻率）
+    if (now - this.lastAdjustTime < 10000) return;
     
     this.queueGrowthRate = queueSize - this.lastQueueSize;
     this.lastQueueSize = queueSize;
     this.lastAdjustTime = now;
     
-    // 隊列積壓嚴重時增加並發
-    if (queueSize > 200 && this.queueGrowthRate > 0) {
-      this.maxConcurrent = Math.min(100, this.maxConcurrent + 10);
-      console.log(`📈 隊列積壓，增加並發至 ${this.maxConcurrent}`);
+    // 根據 CPU 核心數設定上限
+    const maxAllowed = this.cpuCores <= 2 ? 12 : (this.cpuCores <= 4 ? 24 : 50);
+    const minConcurrency = this.cpuCores <= 2 ? 4 : (this.cpuCores <= 4 ? 8 : 16);
+    
+    // 隊列積壓嚴重時適度增加並發
+    if (queueSize > 100 && this.queueGrowthRate > 0) {
+      const increment = this.cpuCores <= 2 ? 2 : 4;
+      this.maxConcurrent = Math.min(maxAllowed, this.maxConcurrent + increment);
+      console.log(`📈 隊列積壓，增加並發至 ${this.maxConcurrent} (CPU: ${this.cpuCores} 核心)`);
     }
     // 隊列穩定時適當減少並發
-    else if (queueSize < 20 && this.queueGrowthRate <= 0 && this.maxConcurrent > 50) {
-      this.maxConcurrent = Math.max(50, this.maxConcurrent - 5);
-      console.log(`📉 隊列穩定，降低並發至 ${this.maxConcurrent}`);
+    else if (queueSize < 10 && this.queueGrowthRate <= 0 && this.maxConcurrent > minConcurrency) {
+      const decrement = this.cpuCores <= 2 ? 1 : 2;
+      this.maxConcurrent = Math.max(minConcurrency, this.maxConcurrent - decrement);
+      console.log(`📉 隊列穩定，降低並發至 ${this.maxConcurrent} (CPU: ${this.cpuCores} 核心)`);
     }
     
     // 記錄性能歷史
@@ -228,11 +251,12 @@ class AdvancedBalanceChecker {
       queueSize,
       activeRequests: this.activeRequests,
       maxConcurrent: this.maxConcurrent,
-      queueGrowthRate: this.queueGrowthRate
+      queueGrowthRate: this.queueGrowthRate,
+      cpuCores: this.cpuCores
     });
     
-    // 只保留最近 100 個記錄
-    if (this.performanceHistory.length > 100) {
+    // 只保留最近 50 個記錄（減少內存使用）
+    if (this.performanceHistory.length > 50) {
       this.performanceHistory.shift();
     }
   }
