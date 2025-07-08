@@ -1,5 +1,6 @@
+require('dotenv').config();
 const UltimateBalanceChecker = require('../src/services/ultimateBalanceChecker');
-const SupabaseClient = require('../src/services/supabaseClient');
+const SupabaseService = require('../src/services/supabaseClient');
 const crypto = require('crypto');
 const os = require('os');
 const fs = require('fs');
@@ -77,7 +78,7 @@ class InfiniteBitcoinHunter {
   // 初始化 Supabase
   async initializeSupabase() {
     try {
-      this.supabase = new SupabaseClient();
+      this.supabase = new SupabaseService();
       this.useSupabase = true;
       this.log(`✅ Supabase 連接成功`);
     } catch (error) {

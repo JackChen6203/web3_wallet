@@ -1,4 +1,5 @@
-const SupabaseClient = require('../src/services/supabaseClient');
+require('dotenv').config();
+const SupabaseService = require('../src/services/supabaseClient');
 const UltimateBalanceChecker = require('../src/services/ultimateBalanceChecker');
 const WalletGenerator = require('../src/utils/walletGenerator');
 const crypto = require('crypto');
@@ -23,7 +24,7 @@ class SupabaseCoordinatedGenerator {
     this.startTime = Date.now();
     
     // 初始化服務
-    this.supabase = new SupabaseClient();
+    this.supabase = new SupabaseService();
     this.balanceChecker = new UltimateBalanceChecker();
     this.walletGenerator = new WalletGenerator();
     

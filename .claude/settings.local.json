@@ -44,7 +44,8 @@
       "Bash(tree:*)",
       "Bash(git init:*)",
       "Bash(git branch:*)",
-      "Bash(git config:*)"
+      "Bash(git config:*)",
+      "Bash(git merge:*)"
     ],
     "deny": []
   }

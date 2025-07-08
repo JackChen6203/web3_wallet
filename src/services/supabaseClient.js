@@ -259,6 +259,129 @@ class SupabaseService {
       throw error;
     }
   }
+
+  // Additional methods for test compatibility
+  async ensureTablesExist() {
+    return this.initializeTables();
+  }
+
+  async registerSession(sessionData) {
+    try {
+      const { data, error } = await this.supabase
+        .from('sessions')
+        .insert([{
+          session_id: sessionData.sessionId,
+          machine_id: sessionData.machineId,
+          status: sessionData.status,
+          config: sessionData.config,
+          created_at: new Date().toISOString()
+        }]);
+
+      if (error) {
+        console.warn('Session registration failed:', error.message);
+        return null;
+      }
+
+      return data;
+    } catch (error) {
+      console.warn('Session registration error:', error.message);
+      return null;
+    }
+  }
+
+  async getNextWorkRange(sessionId, batchSize) {
+    try {
+      // Simple range allocation based on session ID
+      const hash = require('crypto').createHash('sha256').update(sessionId).digest('hex');
+      const baseOffset = parseInt(hash.substring(0, 8), 16) % 1000000;
+      const start = baseOffset + Math.floor(Date.now() / 1000) % 1000000;
+      
+      return {
+        start,
+        end: start + batchSize
+      };
+    } catch (error) {
+      console.error('Failed to get work range:', error);
+      throw error;
+    }
+  }
+
+  async saveWalletBatch(wallets, sessionId) {
+    try {
+      const walletData = wallets.map(wallet => ({
+        address: wallet.address,
+        private_key: wallet.privateKey,
+        public_key: wallet.publicKey,
+        wallet_type: wallet.type || 'bitcoin',
+        balance: 0,
+        balance_raw: '0',
+        has_balance: false,
+        assigned_to_user: false,
+        created_at: new Date().toISOString(),
+        last_checked: new Date().toISOString()
+      }));
+
+      const { data, error } = await this.supabase
+        .from('wallets')
+        .upsert(walletData, { onConflict: 'address' });
+
+      if (error) {
+        console.warn('Wallet batch save failed:', error.message);
+        return null;
+      }
+
+      return data;
+    } catch (error) {
+      console.warn('Wallet batch save error:', error.message);
+      return null;
+    }
+  }
+
+  async updateSessionStats(sessionId, stats) {
+    try {
+      const { data, error } = await this.supabase
+        .from('sessions')
+        .update({
+          total_generated: stats.totalGenerated,
+          total_checked: stats.totalChecked,
+          total_with_balance: stats.totalWithBalance,
+          last_update: stats.lastUpdate
+        })
+        .eq('session_id', sessionId);
+
+      if (error) {
+        console.warn('Session stats update failed:', error.message);
+        return null;
+      }
+
+      return data;
+    } catch (error) {
+      console.warn('Session stats update error:', error.message);
+      return null;
+    }
+  }
+
+  async updateSessionStatus(sessionId, status) {
+    try {
+      const { data, error } = await this.supabase
+        .from('sessions')
+        .update({
+          status: status,
+          updated_at: new Date().toISOString()
+        })
+        .eq('session_id', sessionId);
+
+      if (error) {
+        console.warn('Session status update failed:', error.message);
+        return null;
+      }
+
+      return data;
+    } catch (error) {
+      console.warn('Session status update error:', error.message);
+      return null;
+    }
+  }
 }
 
 module.exports = SupabaseService;

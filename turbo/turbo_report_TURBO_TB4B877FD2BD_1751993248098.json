@@ -1,0 +1,101 @@
+{
+  "machineId": "TB4B877FD2BD",
+  "sessionId": "TURBO_TB4B877FD2BD_1751993248098",
+  "mode": "TURBO",
+  "totalRunTime": 2.329,
+  "totalGenerated": 0,
+  "totalWithBalance": 0,
+  "treasures": [],
+  "generationSpeed": 0,
+  "apiStats": {
+    "apis": {
+      "Blockstream": {
+        "totalRequests": 22,
+        "successfulRequests": 22,
+        "failedRequests": 0,
+        "averageResponseTime": 229.78080368041992,
+        "lastRequestTime": 1751993250361,
+        "isActive": true,
+        "errorCount": 0,
+        "lastError": null,
+        "successRate": "100.00%"
+      },
+      "BlockCypher": {
+        "totalRequests": 0,
+        "successfulRequests": 0,
+        "failedRequests": 0,
+        "averageResponseTime": 0,
+        "lastRequestTime": 0,
+        "isActive": true,
+        "errorCount": 0,
+        "lastError": null,
+        "successRate": "0%"
+      },
+      "Blockchain.info": {
+        "totalRequests": 0,
+        "successfulRequests": 0,
+        "failedRequests": 0,
+        "averageResponseTime": 0,
+        "lastRequestTime": 0,
+        "isActive": true,
+        "errorCount": 0,
+        "lastError": null,
+        "successRate": "0%"
+      },
+      "BTCExplorer": {
+        "totalRequests": 0,
+        "successfulRequests": 0,
+        "failedRequests": 0,
+        "averageResponseTime": 0,
+        "lastRequestTime": 0,
+        "isActive": true,
+        "errorCount": 0,
+        "lastError": null,
+        "successRate": "0%"
+      },
+      "Etherscan": {
+        "totalRequests": 0,
+        "successfulRequests": 0,
+        "failedRequests": 0,
+        "averageResponseTime": 0,
+        "lastRequestTime": 0,
+        "isActive": true,
+        "errorCount": 0,
+        "lastError": null,
+        "successRate": "0%"
+      },
+      "Alchemy": {
+        "totalRequests": 0,
+        "successfulRequests": 0,
+        "failedRequests": 0,
+        "averageResponseTime": 0,
+        "lastRequestTime": 0,
+        "isActive": true,
+        "errorCount": 0,
+        "lastError": null,
+        "successRate": "0%"
+      },
+      "Infura": {
+        "totalRequests": 0,
+        "successfulRequests": 0,
+        "failedRequests": 0,
+        "averageResponseTime": 0,
+        "lastRequestTime": 0,
+        "isActive": true,
+        "errorCount": 0,
+        "lastError": null,
+        "successRate": "0%"
+      }
+    },
+    "queue": {
+      "pending": 58,
+      "processing": 20,
+      "maxConcurrent": 20
+    },
+    "cache": {
+      "size": 22,
+      "expiryTime": "300s"
+    }
+  },
+  "endTime": "2025-07-08T16:47:30.421Z"
+}
