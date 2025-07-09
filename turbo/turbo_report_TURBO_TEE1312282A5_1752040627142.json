@@ -1,0 +1,145 @@
+{
+  "machineId": "TEE1312282A5",
+  "sessionId": "TURBO_TEE1312282A5_1752040627142",
+  "mode": "TURBO",
+  "totalRunTime": 4.285,
+  "totalGenerated": 0,
+  "totalWithBalance": 0,
+  "treasures": [],
+  "generationSpeed": 0,
+  "apiStats": {
+    "apis": {
+      "Blockstream": {
+        "totalRequests": 0,
+        "successfulRequests": 0,
+        "failedRequests": 0,
+        "averageResponseTime": 0,
+        "lastRequestTime": 0,
+        "isActive": true,
+        "errorCount": 0,
+        "lastError": null,
+        "successRate": "0%"
+      },
+      "BlockCypher": {
+        "totalRequests": 0,
+        "successfulRequests": 0,
+        "failedRequests": 0,
+        "averageResponseTime": 0,
+        "lastRequestTime": 0,
+        "isActive": true,
+        "errorCount": 0,
+        "lastError": null,
+        "successRate": "0%"
+      },
+      "Blockchain.info": {
+        "totalRequests": 0,
+        "successfulRequests": 0,
+        "failedRequests": 0,
+        "averageResponseTime": 0,
+        "lastRequestTime": 0,
+        "isActive": true,
+        "errorCount": 0,
+        "lastError": null,
+        "successRate": "0%"
+      },
+      "Mempool.space": {
+        "totalRequests": 0,
+        "successfulRequests": 0,
+        "failedRequests": 0,
+        "averageResponseTime": 0,
+        "lastRequestTime": 0,
+        "isActive": true,
+        "errorCount": 0,
+        "lastError": null,
+        "successRate": "0%"
+      },
+      "Blockchair": {
+        "totalRequests": 0,
+        "successfulRequests": 0,
+        "failedRequests": 0,
+        "averageResponseTime": 0,
+        "lastRequestTime": 0,
+        "isActive": true,
+        "errorCount": 0,
+        "lastError": null,
+        "successRate": "0%"
+      },
+      "SoChain": {
+        "totalRequests": 0,
+        "successfulRequests": 0,
+        "failedRequests": 0,
+        "averageResponseTime": 0,
+        "lastRequestTime": 0,
+        "isActive": true,
+        "errorCount": 0,
+        "lastError": null,
+        "successRate": "0%"
+      },
+      "SmartBit": {
+        "totalRequests": 0,
+        "successfulRequests": 0,
+        "failedRequests": 0,
+        "averageResponseTime": 0,
+        "lastRequestTime": 0,
+        "isActive": true,
+        "errorCount": 0,
+        "lastError": null,
+        "successRate": "0%"
+      },
+      "Etherscan": {
+        "totalRequests": 0,
+        "successfulRequests": 0,
+        "failedRequests": 0,
+        "averageResponseTime": 0,
+        "lastRequestTime": 0,
+        "isActive": true,
+        "errorCount": 0,
+        "lastError": null,
+        "successRate": "0%"
+      },
+      "Alchemy": {
+        "totalRequests": 0,
+        "successfulRequests": 0,
+        "failedRequests": 0,
+        "averageResponseTime": 0,
+        "lastRequestTime": 0,
+        "isActive": true,
+        "errorCount": 0,
+        "lastError": null,
+        "successRate": "0%"
+      },
+      "Infura": {
+        "totalRequests": 0,
+        "successfulRequests": 0,
+        "failedRequests": 0,
+        "averageResponseTime": 0,
+        "lastRequestTime": 0,
+        "isActive": true,
+        "errorCount": 0,
+        "lastError": null,
+        "successRate": "0%"
+      }
+    },
+    "overall": {
+      "totalRequests": 0,
+      "successfulRequests": 0,
+      "successRate": "0%"
+    },
+    "queue": {
+      "pending": 49,
+      "processing": 1,
+      "maxConcurrent": 50,
+      "dynamicScaling": true
+    },
+    "cache": {
+      "size": 0,
+      "expiryTime": "300s"
+    },
+    "performance": {
+      "queueGrowthRate": 0,
+      "lastQueueSize": 0,
+      "recentPerformance": []
+    }
+  },
+  "endTime": "2025-07-09T05:57:11.426Z"
+}

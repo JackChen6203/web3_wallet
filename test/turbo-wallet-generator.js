@@ -24,6 +24,10 @@ class TurboWalletGenerator {
     this.currentIndex = 0;
     this.batchSize = this.getOptimalBatchSize(); // 根據環境自動調整批次大小
     
+    // 進度文件路徑
+    this.progressFile = `turbo/progress_${this.machineId}.json`;
+    this.resumeFromProgress = false;
+    
     // Supabase
     this.supabase = null;
     this.useSupabase = false;
@@ -268,6 +272,9 @@ class TurboWalletGenerator {
     console.log(`📦 批次大小: ${this.batchSize} 錢包/批次`);
     console.log(`⚡ 特色: 高速生成 + 智能餘額檢查 + 多API負載平衡`);
     
+    // 加載進度
+    await this.loadProgress();
+    
     await this.initializeSupabase();
     
     const checkBalance = options.checkBalance !== false; // 默認啟用
@@ -312,6 +319,11 @@ class TurboWalletGenerator {
         
         this.currentIndex += currentBatchSize;
         
+        // 定期保存進度（每1000個錢包保存一次）
+        if (this.totalGenerated % 1000 === 0) {
+          await this.saveProgress();
+        }
+        
         // 避免過度 CPU 使用
         await new Promise(resolve => setTimeout(resolve, 1));
       }
@@ -333,6 +345,64 @@ class TurboWalletGenerator {
     });
   }
 
+  // 加載進度
+  async loadProgress() {
+    try {
+      if (fs.existsSync(this.progressFile)) {
+        const progressData = JSON.parse(fs.readFileSync(this.progressFile, 'utf8'));
+        
+        // 檢查進度是否有效（24小時內）
+        const progressAge = Date.now() - progressData.lastUpdate;
+        if (progressAge < 24 * 60 * 60 * 1000) {
+          this.currentRange = progressData.currentRange;
+          this.currentIndex = progressData.currentIndex;
+          this.totalGenerated = progressData.totalGenerated || 0;
+          this.totalWithBalance = progressData.totalWithBalance || 0;
+          this.treasures = progressData.treasures || [];
+          this.resumeFromProgress = true;
+          
+          console.log(`📂 加載進度: 從索引 ${this.currentIndex.toLocaleString()} 恢復`);
+          console.log(`📊 歷史統計: 已生成 ${this.totalGenerated.toLocaleString()} 個，發現 ${this.totalWithBalance} 個有餘額`);
+          console.log(`📋 恢復範圍: ${this.currentRange.start.toLocaleString()} - ${this.currentRange.end.toLocaleString()}`);
+          return true;
+        } else {
+          console.log(`⏰ 進度文件過期（${Math.floor(progressAge / 3600000)}小時前），開始新任務`);
+          fs.unlinkSync(this.progressFile);
+        }
+      }
+    } catch (error) {
+      console.warn(`⚠️ 加載進度失敗: ${error.message}`);
+    }
+    return false;
+  }
+
+  // 保存進度
+  async saveProgress() {
+    try {
+      const progressData = {
+        machineId: this.machineId,
+        sessionId: this.sessionId,
+        currentRange: this.currentRange,
+        currentIndex: this.currentIndex,
+        totalGenerated: this.totalGenerated,
+        totalWithBalance: this.totalWithBalance,
+        treasures: this.treasures,
+        lastUpdate: Date.now(),
+        timestamp: new Date().toISOString()
+      };
+      
+      // 確保目錄存在
+      const progressDir = require('path').dirname(this.progressFile);
+      if (!fs.existsSync(progressDir)) {
+        fs.mkdirSync(progressDir, { recursive: true });
+      }
+      
+      fs.writeFileSync(this.progressFile, JSON.stringify(progressData, null, 2));
+    } catch (error) {
+      console.warn(`⚠️ 保存進度失敗: ${error.message}`);
+    }
+  }
+
   // 優雅停止
   setupGracefulShutdown() {
     let isShuttingDown = false;
@@ -343,6 +413,10 @@ class TurboWalletGenerator {
       this.isRunning = false;
       
       console.log(`\n🛑 收到 ${signal} 信號，正在停止...`);
+      
+      // 保存當前進度
+      await this.saveProgress();
+      console.log(`💾 進度已保存至 ${this.progressFile}`);
       
       await this.saveFinalReport();
       this.balanceChecker.stop();
