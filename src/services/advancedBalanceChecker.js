@@ -24,10 +24,28 @@ class AdvancedBalanceChecker {
         priority: 3
       },
       {
-        name: 'BTCExplorer',
-        url: 'https://blockexplorer.com/api',
-        rateLimit: 30,
+        name: 'Mempool.space',
+        url: 'https://mempool.space/api',
+        rateLimit: 60,
         priority: 4
+      },
+      {
+        name: 'Blockchair',
+        url: 'https://api.blockchair.com/bitcoin',
+        rateLimit: 30,
+        priority: 5
+      },
+      {
+        name: 'SoChain',
+        url: 'https://sochain.com/api/v2',
+        rateLimit: 300,
+        priority: 6
+      },
+      {
+        name: 'SmartBit',
+        url: 'https://api.smartbit.com.au/v1/blockchain',
+        rateLimit: 50,
+        priority: 7
       }
     ];
 
@@ -336,6 +354,30 @@ class AdvancedBalanceChecker {
           });
           break;
           
+        case 'Mempool.space':
+          response = await axios.get(`${api.url}/address/${address}`, {
+            timeout: 5000
+          });
+          break;
+          
+        case 'Blockchair':
+          response = await axios.get(`${api.url}/dashboards/address/${address}`, {
+            timeout: 5000
+          });
+          break;
+          
+        case 'SoChain':
+          response = await axios.get(`${api.url}/get_address_balance/BTC/${address}`, {
+            timeout: 5000
+          });
+          break;
+          
+        case 'SmartBit':
+          response = await axios.get(`${api.url}/address/${address}`, {
+            timeout: 5000
+          });
+          break;
+          
         default:
           throw new Error(`Unsupported Bitcoin API: ${api.name}`);
       }
@@ -383,6 +425,44 @@ class AdvancedBalanceChecker {
             unconfirmed: 0,
             total: totalSatoshis
           };
+          break;
+          
+        case 'Mempool.space':
+          balance = {
+            confirmed: data.chain_stats.funded_txo_sum - data.chain_stats.spent_txo_sum,
+            unconfirmed: data.mempool_stats.funded_txo_sum - data.mempool_stats.spent_txo_sum,
+            total: (data.chain_stats.funded_txo_sum - data.chain_stats.spent_txo_sum) + 
+                   (data.mempool_stats.funded_txo_sum - data.mempool_stats.spent_txo_sum)
+          };
+          break;
+          
+        case 'Blockchair':
+          const addrData = data.data[address];
+          if (addrData) {
+            balance = {
+              confirmed: addrData.address.balance || 0,
+              unconfirmed: addrData.address.unconfirmed_balance || 0,
+              total: (addrData.address.balance || 0) + (addrData.address.unconfirmed_balance || 0)
+            };
+          }
+          break;
+          
+        case 'SoChain':
+          if (data.status === 'success') {
+            const balanceStr = data.data.confirmed_balance;
+            const satoshis = Math.round(parseFloat(balanceStr) * 100000000);
+            balance = { confirmed: satoshis, unconfirmed: 0, total: satoshis };
+          }
+          break;
+          
+        case 'SmartBit':
+          if (data.success && data.address) {
+            balance = {
+              confirmed: data.address.confirmed.balance_int || 0,
+              unconfirmed: data.address.unconfirmed.balance_int || 0,
+              total: (data.address.confirmed.balance_int || 0) + (data.address.unconfirmed.balance_int || 0)
+            };
+          }
           break;
       }
     } catch (parseError) {

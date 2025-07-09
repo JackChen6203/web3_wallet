@@ -79,15 +79,6 @@ class UltimateBalanceChecker {
         parser: 'mempool'
       },
       {
-        name: 'BTCExplorer',
-        url: 'https://blockexplorer.com/api',
-        rateLimit: 30,
-        priority: 9,
-        method: 'GET',
-        endpoint: '/addr/{address}',
-        parser: 'btcexplorer'
-      },
-      {
         name: 'CryptoID',
         url: 'https://chainz.cryptoid.info/btc/api.dws',
         rateLimit: 100,
@@ -353,7 +344,6 @@ class UltimateBalanceChecker {
           break;
           
         case 'insight':
-        case 'btcexplorer':
           balance = {
             confirmed: Math.round((data.balance || 0) * 100000000),
             unconfirmed: Math.round((data.unconfirmedBalance || 0) * 100000000),
