@@ -262,7 +262,42 @@ class SupabaseService {
 
   // Additional methods for test compatibility
   async ensureTablesExist() {
-    return this.initializeTables();
+    await this.initializeTables();
+    await this.createWorkRangesTable();
+    return true;
+  }
+
+  async createWorkRangesTable() {
+    try {
+      // 工作範圍表不存在時才創建
+      const { data, error } = await this.supabase
+        .from('work_ranges')
+        .select('id')
+        .limit(1);
+
+      // 如果表不存在，這裡會出錯，我們就創建它
+      if (error && error.code === 'PGRST106') {
+        console.log('📊 創建工作範圍協調表...');
+        // 注意：在實際應用中，你需要在 Supabase 控制台手動創建這個表
+        // 或者使用 Supabase 的 SQL 編輯器執行以下 SQL：
+        /*
+        CREATE TABLE work_ranges (
+          id SERIAL PRIMARY KEY,
+          start_index BIGINT NOT NULL,
+          end_index BIGINT NOT NULL,
+          status VARCHAR(20) DEFAULT 'available',
+          assigned_to VARCHAR(255),
+          assigned_at TIMESTAMP,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          INDEX idx_status (status),
+          INDEX idx_range (start_index, end_index)
+        );
+        */
+        console.log('⚠️ 請在 Supabase 中手動創建 work_ranges 表');
+      }
+    } catch (error) {
+      console.warn('工作範圍表檢查失敗:', error.message);
+    }
   }
 
   async registerSession(sessionData) {
@@ -291,18 +326,82 @@ class SupabaseService {
 
   async getNextWorkRange(sessionId, batchSize) {
     try {
-      // Simple range allocation based on session ID
-      const hash = require('crypto').createHash('sha256').update(sessionId).digest('hex');
-      const baseOffset = parseInt(hash.substring(0, 8), 16) % 1000000;
-      const start = baseOffset + Math.floor(Date.now() / 1000) % 1000000;
+      // 嘗試從資料庫獲取下一個可用範圍
+      const { data, error } = await this.supabase
+        .from('work_ranges')
+        .select('*')
+        .eq('status', 'available')
+        .order('start_index', { ascending: true })
+        .limit(1);
+
+      if (error && error.code !== 'PGRST116') {
+        console.warn('查詢工作範圍失敗:', error.message);
+      }
+
+      let start, end;
+
+      if (data && data.length > 0) {
+        // 使用資料庫中的可用範圍
+        const range = data[0];
+        start = range.start_index;
+        end = range.end_index;
+
+        // 標記為已分配
+        await this.supabase
+          .from('work_ranges')
+          .update({
+            status: 'assigned',
+            assigned_to: sessionId,
+            assigned_at: new Date().toISOString()
+          })
+          .eq('id', range.id);
+
+        console.log(`📋 從資料庫分配範圍: ${start.toLocaleString()} - ${end.toLocaleString()}`);
+      } else {
+        // 創建新的範圍
+        const lastRangeQuery = await this.supabase
+          .from('work_ranges')
+          .select('end_index')
+          .order('end_index', { ascending: false })
+          .limit(1);
+
+        const lastEnd = lastRangeQuery.data && lastRangeQuery.data.length > 0 
+          ? lastRangeQuery.data[0].end_index 
+          : 0;
+
+        start = lastEnd + 1;
+        end = start + batchSize - 1;
+
+        // 插入新範圍
+        await this.supabase
+          .from('work_ranges')
+          .insert({
+            start_index: start,
+            end_index: end,
+            status: 'assigned',
+            assigned_to: sessionId,
+            assigned_at: new Date().toISOString(),
+            created_at: new Date().toISOString()
+          });
+
+        console.log(`📋 創建新範圍: ${start.toLocaleString()} - ${end.toLocaleString()}`);
+      }
       
       return {
         start,
-        end: start + batchSize
+        end
       };
     } catch (error) {
-      console.error('Failed to get work range:', error);
-      throw error;
+      // 回退到基於時間戳的範圍分配
+      console.warn('範圍協調失敗，使用回退方案:', error.message);
+      const timestamp = Date.now();
+      const hash = require('crypto').createHash('sha256').update(`${sessionId}_${timestamp}`).digest('hex');
+      const baseOffset = parseInt(hash.substring(0, 12), 16) % 1000000000;
+      
+      return {
+        start: baseOffset,
+        end: baseOffset + batchSize - 1
+      };
     }
   }
 
@@ -379,6 +478,50 @@ class SupabaseService {
       return data;
     } catch (error) {
       console.warn('Session status update error:', error.message);
+      return null;
+    }
+  }
+
+  async completeWorkRange(sessionId, startIndex, endIndex) {
+    try {
+      const { data, error } = await this.supabase
+        .from('work_ranges')
+        .update({
+          status: 'completed',
+          completed_at: new Date().toISOString()
+        })
+        .eq('assigned_to', sessionId)
+        .eq('start_index', startIndex)
+        .eq('end_index', endIndex);
+
+      if (error) {
+        console.warn('Work range completion failed:', error.message);
+        return null;
+      }
+
+      console.log(`✅ 範圍完成: ${startIndex.toLocaleString()} - ${endIndex.toLocaleString()}`);
+      return data;
+    } catch (error) {
+      console.warn('Work range completion error:', error.message);
+      return null;
+    }
+  }
+
+  async getWorkRangeProgress() {
+    try {
+      const { data, error } = await this.supabase
+        .from('work_ranges')
+        .select('status, COUNT(*)')
+        .groupBy('status');
+
+      if (error) {
+        console.warn('Work range progress query failed:', error.message);
+        return null;
+      }
+
+      return data;
+    } catch (error) {
+      console.warn('Work range progress query error:', error.message);
       return null;
     }
   }

@@ -1,0 +1,153 @@
+{
+  "machineId": "TEE1312282A5",
+  "sessionId": "TURBO_TEE1312282A5_1752020170022",
+  "mode": "TURBO",
+  "totalRunTime": 481.63,
+  "totalGenerated": 17200,
+  "totalWithBalance": 0,
+  "treasures": [],
+  "generationSpeed": 35.71206112576044,
+  "apiStats": {
+    "apis": {
+      "Blockstream": {
+        "totalRequests": 19071,
+        "successfulRequests": 17072,
+        "failedRequests": 1999,
+        "averageResponseTime": 205.33249266863933,
+        "lastRequestTime": 1752020651638,
+        "isActive": false,
+        "errorCount": 28,
+        "lastError": "Request failed with status code 429",
+        "successRate": "89.52%"
+      },
+      "BlockCypher": {
+        "totalRequests": 43,
+        "successfulRequests": 10,
+        "failedRequests": 33,
+        "averageResponseTime": 930.8515625,
+        "lastRequestTime": 1752020651647,
+        "isActive": false,
+        "errorCount": 31,
+        "lastError": "Request failed with status code 429",
+        "successRate": "23.26%"
+      },
+      "Blockchain.info": {
+        "totalRequests": 49,
+        "successfulRequests": 20,
+        "failedRequests": 29,
+        "averageResponseTime": 801.8275194168091,
+        "lastRequestTime": 1752020649850,
+        "isActive": false,
+        "errorCount": 29,
+        "lastError": "Request failed with status code 429",
+        "successRate": "40.82%"
+      },
+      "BTCExplorer": {
+        "totalRequests": 29,
+        "successfulRequests": 0,
+        "failedRequests": 29,
+        "averageResponseTime": 0,
+        "lastRequestTime": 1752020651620,
+        "isActive": false,
+        "errorCount": 29,
+        "lastError": "Unsupported Bitcoin API: BTCExplorer",
+        "successRate": "0.00%"
+      },
+      "Etherscan": {
+        "totalRequests": 0,
+        "successfulRequests": 0,
+        "failedRequests": 0,
+        "averageResponseTime": 0,
+        "lastRequestTime": 0,
+        "isActive": true,
+        "errorCount": 0,
+        "lastError": null,
+        "successRate": "0%"
+      },
+      "Alchemy": {
+        "totalRequests": 0,
+        "successfulRequests": 0,
+        "failedRequests": 0,
+        "averageResponseTime": 0,
+        "lastRequestTime": 0,
+        "isActive": true,
+        "errorCount": 0,
+        "lastError": null,
+        "successRate": "0%"
+      },
+      "Infura": {
+        "totalRequests": 0,
+        "successfulRequests": 0,
+        "failedRequests": 0,
+        "averageResponseTime": 0,
+        "lastRequestTime": 0,
+        "isActive": true,
+        "errorCount": 0,
+        "lastError": null,
+        "successRate": "0%"
+      }
+    },
+    "overall": {
+      "totalRequests": 19192,
+      "successfulRequests": 17102,
+      "successRate": "89.1%"
+    },
+    "queue": {
+      "pending": 24,
+      "processing": 13,
+      "maxConcurrent": 16,
+      "dynamicScaling": true
+    },
+    "cache": {
+      "size": 11258,
+      "expiryTime": "300s"
+    },
+    "performance": {
+      "queueGrowthRate": 0,
+      "lastQueueSize": 0,
+      "recentPerformance": [
+        {
+          "timestamp": 1752020607508,
+          "queueSize": 0,
+          "activeRequests": 9,
+          "maxConcurrent": 16,
+          "queueGrowthRate": -48,
+          "cpuCores": 16
+        },
+        {
+          "timestamp": 1752020617517,
+          "queueSize": 1,
+          "activeRequests": 0,
+          "maxConcurrent": 16,
+          "queueGrowthRate": 1,
+          "cpuCores": 16
+        },
+        {
+          "timestamp": 1752020629151,
+          "queueSize": 19,
+          "activeRequests": 14,
+          "maxConcurrent": 16,
+          "queueGrowthRate": 18,
+          "cpuCores": 16
+        },
+        {
+          "timestamp": 1752020639159,
+          "queueSize": 0,
+          "activeRequests": 11,
+          "maxConcurrent": 16,
+          "queueGrowthRate": -19,
+          "cpuCores": 16
+        },
+        {
+          "timestamp": 1752020649167,
+          "queueSize": 0,
+          "activeRequests": 4,
+          "maxConcurrent": 16,
+          "queueGrowthRate": 0,
+          "cpuCores": 16
+        }
+      ]
+    }
+  },
+  "endTime": "2025-07-09T00:24:11.651Z"
+}

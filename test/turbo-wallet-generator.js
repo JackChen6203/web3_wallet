@@ -80,16 +80,45 @@ class TurboWalletGenerator {
     }
   }
 
-  // 獲取下一個範圍
+  // 獲取下一個範圍 - 確保每台主機獲得不同範圍
   async getNextRange() {
-    const hash = crypto.createHash('sha256').update(this.machineId).digest('hex');
-    const baseOffset = parseInt(hash.substring(0, 8), 16) % 1000000;
-    const rangeStart = baseOffset + (this.stats.assignedRanges?.length || 0) * this.rangeSize;
+    // 使用主機名、CPU、時間戳創建唯一標識
+    const hostname = require('os').hostname();
+    const cpuInfo = require('os').cpus()[0].model;
+    const uniqueString = `${hostname}_${cpuInfo}_${this.machineId}_${Date.now()}`;
+    const hash = crypto.createHash('sha256').update(uniqueString).digest('hex');
+    
+    // 使用 hash 的不同部分來創建大範圍分散
+    const segment1 = parseInt(hash.substring(0, 8), 16);
+    const segment2 = parseInt(hash.substring(8, 16), 16);
+    const segment3 = parseInt(hash.substring(16, 24), 16);
+    
+    // 創建一個很大的基礎偏移，確保不同主機在完全不同的數字空間
+    const baseOffset = (segment1 % 100000000) + (segment2 % 1000000) * 100000000 + (segment3 % 10000);
+    
+    // 如果使用 Supabase，嘗試協調分配
+    if (this.useSupabase) {
+      try {
+        const coordinatedRange = await this.supabase.getNextWorkRange(this.sessionId, this.rangeSize);
+        if (coordinatedRange) {
+          console.log(`📋 從 Supabase 獲得協調範圍: ${coordinatedRange.start.toLocaleString()} - ${coordinatedRange.end.toLocaleString()}`);
+          return coordinatedRange;
+        }
+      } catch (error) {
+        console.log(`⚠️ Supabase 範圍協調失敗，使用本地分配: ${error.message}`);
+      }
+    }
+    
+    // 本地分配確保唯一性
+    const rangeStart = baseOffset;
+    
+    console.log(`📋 分配新範圍: ${rangeStart.toLocaleString()} - ${(rangeStart + this.rangeSize - 1).toLocaleString()}`);
+    console.log(`🆔 主機標識: ${hostname} (${this.machineId})`);
     
     return {
       start: rangeStart,
       end: rangeStart + this.rangeSize - 1,
-      id: `turbo_${Date.now()}`
+      id: `turbo_${this.machineId}_${Date.now()}`
     };
   }
 
