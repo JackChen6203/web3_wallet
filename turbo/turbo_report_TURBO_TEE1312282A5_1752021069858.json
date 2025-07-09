@@ -1,0 +1,186 @@
+{
+  "machineId": "TEE1312282A5",
+  "sessionId": "TURBO_TEE1312282A5_1752021069858",
+  "mode": "TURBO",
+  "totalRunTime": 50.531,
+  "totalGenerated": 200,
+  "totalWithBalance": 0,
+  "treasures": [],
+  "generationSpeed": 3.9579663968652907,
+  "apiStats": {
+    "apis": {
+      "Blockstream": {
+        "totalRequests": 543,
+        "successfulRequests": 294,
+        "failedRequests": 249,
+        "averageResponseTime": 195.13589549242238,
+        "lastRequestTime": 1752021120349,
+        "isActive": false,
+        "errorCount": 25,
+        "lastError": "Request failed with status code 429",
+        "successRate": "54.14%"
+      },
+      "BlockCypher": {
+        "totalRequests": 33,
+        "successfulRequests": 0,
+        "failedRequests": 33,
+        "averageResponseTime": 0,
+        "lastRequestTime": 1752021119697,
+        "isActive": false,
+        "errorCount": 33,
+        "lastError": "Request failed with status code 429",
+        "successRate": "0.00%"
+      },
+      "Blockchain.info": {
+        "totalRequests": 34,
+        "successfulRequests": 0,
+        "failedRequests": 34,
+        "averageResponseTime": 0,
+        "lastRequestTime": 1752021119738,
+        "isActive": false,
+        "errorCount": 34,
+        "lastError": "Request failed with status code 429",
+        "successRate": "0.00%"
+      },
+      "Mempool.space": {
+        "totalRequests": 51,
+        "successfulRequests": 0,
+        "failedRequests": 51,
+        "averageResponseTime": 0,
+        "lastRequestTime": 1752021118582,
+        "isActive": false,
+        "errorCount": 51,
+        "lastError": "",
+        "successRate": "0.00%"
+      },
+      "Blockchair": {
+        "totalRequests": 37,
+        "successfulRequests": 0,
+        "failedRequests": 37,
+        "averageResponseTime": 0,
+        "lastRequestTime": 1752021120040,
+        "isActive": false,
+        "errorCount": 37,
+        "lastError": "Request failed with status code 430",
+        "successRate": "0.00%"
+      },
+      "SoChain": {
+        "totalRequests": 59,
+        "successfulRequests": 0,
+        "failedRequests": 59,
+        "averageResponseTime": 0,
+        "lastRequestTime": 1752021112051,
+        "isActive": false,
+        "errorCount": 59,
+        "lastError": "timeout of 5000ms exceeded",
+        "successRate": "0.00%"
+      },
+      "SmartBit": {
+        "totalRequests": 50,
+        "successfulRequests": 0,
+        "failedRequests": 50,
+        "averageResponseTime": 0,
+        "lastRequestTime": 1752021097659,
+        "isActive": false,
+        "errorCount": 50,
+        "lastError": "timeout of 5000ms exceeded",
+        "successRate": "0.00%"
+      },
+      "Etherscan": {
+        "totalRequests": 0,
+        "successfulRequests": 0,
+        "failedRequests": 0,
+        "averageResponseTime": 0,
+        "lastRequestTime": 0,
+        "isActive": true,
+        "errorCount": 0,
+        "lastError": null,
+        "successRate": "0%"
+      },
+      "Alchemy": {
+        "totalRequests": 0,
+        "successfulRequests": 0,
+        "failedRequests": 0,
+        "averageResponseTime": 0,
+        "lastRequestTime": 0,
+        "isActive": true,
+        "errorCount": 0,
+        "lastError": null,
+        "successRate": "0%"
+      },
+      "Infura": {
+        "totalRequests": 0,
+        "successfulRequests": 0,
+        "failedRequests": 0,
+        "averageResponseTime": 0,
+        "lastRequestTime": 0,
+        "isActive": true,
+        "errorCount": 0,
+        "lastError": null,
+        "successRate": "0%"
+      }
+    },
+    "overall": {
+      "totalRequests": 807,
+      "successfulRequests": 294,
+      "successRate": "36.4%"
+    },
+    "queue": {
+      "pending": 0,
+      "processing": 3,
+      "maxConcurrent": 42,
+      "dynamicScaling": true
+    },
+    "cache": {
+      "size": 294,
+      "expiryTime": "300s"
+    },
+    "performance": {
+      "queueGrowthRate": -6,
+      "lastQueueSize": 0,
+      "recentPerformance": [
+        {
+          "timestamp": 1752021079859,
+          "queueSize": 0,
+          "activeRequests": 14,
+          "maxConcurrent": 48,
+          "queueGrowthRate": 0,
+          "cpuCores": 16
+        },
+        {
+          "timestamp": 1752021089867,
+          "queueSize": 0,
+          "activeRequests": 20,
+          "maxConcurrent": 46,
+          "queueGrowthRate": 0,
+          "cpuCores": 16
+        },
+        {
+          "timestamp": 1752021099874,
+          "queueSize": 0,
+          "activeRequests": 3,
+          "maxConcurrent": 44,
+          "queueGrowthRate": 0,
+          "cpuCores": 16
+        },
+        {
+          "timestamp": 1752021109882,
+          "queueSize": 6,
+          "activeRequests": 44,
+          "maxConcurrent": 44,
+          "queueGrowthRate": 6,
+          "cpuCores": 16
+        },
+        {
+          "timestamp": 1752021119882,
+          "queueSize": 0,
+          "activeRequests": 7,
+          "maxConcurrent": 42,
+          "queueGrowthRate": -6,
+          "cpuCores": 16
+        }
+      ]
+    }
+  },
+  "endTime": "2025-07-09T00:32:00.388Z"
+}

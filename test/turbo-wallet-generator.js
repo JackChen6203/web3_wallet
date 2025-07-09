@@ -94,7 +94,12 @@ class TurboWalletGenerator {
     const segment3 = parseInt(hash.substring(16, 24), 16);
     
     // 創建一個很大的基礎偏移，確保不同主機在完全不同的數字空間
-    const baseOffset = (segment1 % 100000000) + (segment2 % 1000000) * 100000000 + (segment3 % 10000);
+    // 使用更大的偏移量來避免衝突
+    const hostHash = parseInt(hash.substring(0, 6), 16) % 10000; // 0-9999
+    const timeHash = parseInt(hash.substring(6, 12), 16) % 1000; // 0-999
+    const machineHash = parseInt(hash.substring(12, 18), 16) % 100; // 0-99
+    
+    const baseOffset = hostHash * 1000000 + timeHash * 1000 + machineHash * 10 + 1;
     
     // 如果使用 Supabase，嘗試協調分配
     if (this.useSupabase) {

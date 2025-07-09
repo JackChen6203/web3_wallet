@@ -338,43 +338,71 @@ class AdvancedBalanceChecker {
       switch (api.name) {
         case 'Blockstream':
           response = await axios.get(`${api.url}/address/${address}`, {
-            timeout: 5000
+            timeout: 8000,
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (compatible; BitcoinWalletChecker/1.0)',
+              'Accept': 'application/json'
+            }
           });
           break;
           
         case 'BlockCypher':
           response = await axios.get(`${api.url}/addrs/${address}/balance`, {
-            timeout: 5000
+            timeout: 8000,
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (compatible; BitcoinWalletChecker/1.0)',
+              'Accept': 'application/json'
+            }
           });
           break;
           
         case 'Blockchain.info':
           response = await axios.get(`${api.url}/q/addressbalance/${address}`, {
-            timeout: 5000
+            timeout: 8000,
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (compatible; BitcoinWalletChecker/1.0)',
+              'Accept': 'text/plain'
+            }
           });
           break;
           
         case 'Mempool.space':
           response = await axios.get(`${api.url}/address/${address}`, {
-            timeout: 5000
+            timeout: 8000,
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (compatible; BitcoinWalletChecker/1.0)',
+              'Accept': 'application/json'
+            }
           });
           break;
           
         case 'Blockchair':
           response = await axios.get(`${api.url}/dashboards/address/${address}`, {
-            timeout: 5000
+            timeout: 8000,
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (compatible; BitcoinWalletChecker/1.0)',
+              'Accept': 'application/json'
+            }
           });
           break;
           
         case 'SoChain':
           response = await axios.get(`${api.url}/get_address_balance/BTC/${address}`, {
-            timeout: 5000
+            timeout: 8000,
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (compatible; BitcoinWalletChecker/1.0)',
+              'Accept': 'application/json'
+            }
           });
           break;
           
         case 'SmartBit':
           response = await axios.get(`${api.url}/address/${address}`, {
-            timeout: 5000
+            timeout: 8000,
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (compatible; BitcoinWalletChecker/1.0)',
+              'Accept': 'application/json'
+            }
           });
           break;
           
